@@ -26,6 +26,7 @@ python -m uvicorn app:app --host 0.0.0.0 --port "$MODEL_SERVER_PORT" > "$MODEL_L
 # Start pyworker bootstrap in the background and stream its logs.
 bootstrap_script=https://raw.githubusercontent.com/vast-ai/pyworker/refs/heads/main/start_server.sh;
 echo "on_start: launching pyworker bootstrap"
+mkdir -p /workspace
 bash -c "curl -L \"$bootstrap_script\" | bash" &
 BOOT_PID=$!
 echo "on_start: bootstrap pid $BOOT_PID"
