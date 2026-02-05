@@ -23,11 +23,13 @@ fi
 # Start the FastAPI model server in the background
 python -m uvicorn app:app --host 0.0.0.0 --port "$MODEL_SERVER_PORT" > "$MODEL_LOG_FILE" 2>&1 &
 
-# Start pyworker bootstrap
+# Start pyworker bootstrap in the background and stream its logs.
 bootstrap_script=https://raw.githubusercontent.com/vast-ai/pyworker/refs/heads/main/start_server.sh;
-if ! curl -L "$bootstrap_script" | bash; then
-  echo "on_start: pyworker bootstrap failed, sleeping for logs"
-  sleep 600
-  exit 1
-fi
+echo "on_start: launching pyworker bootstrap"
+bash -c "curl -L \"$bootstrap_script\" | bash" &
+BOOT_PID=$!
+echo "on_start: bootstrap pid $BOOT_PID"
 
+touch /workspace/pyworker.log /workspace/debug.log
+echo "on_start: tailing /workspace/pyworker.log and /workspace/debug.log"
+tail -n +1 -F /workspace/pyworker.log /workspace/debug.log
